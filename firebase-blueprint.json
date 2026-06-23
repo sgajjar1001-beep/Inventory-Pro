@@ -1,0 +1,145 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "User account for inventory access",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "The unique user ID" },
+        "username": { "type": "string", "description": "The unique ID used to login" },
+        "password": { "type": "string", "description": "The password for logging in" },
+        "name": { "type": "string", "description": "Full name of the user" },
+        "role": { "type": "string", "enum": ["Admin", "GRN Operator", "QC Operator", "Viewer"], "description": "User role" },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Creation timestamp" }
+      },
+      "required": ["id", "username", "password", "name", "role", "createdAt"]
+    },
+    "Material": {
+      "title": "Material",
+      "description": "Information about raw materials, PPM, and SPM",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Unique material token ID" },
+        "materialCode": { "type": "string", "description": "Unique human-readable material code" },
+        "materialName": { "type": "string", "description": "Name of the material" },
+        "category": { "type": "string", "enum": ["Raw Material", "PPM", "SPM", "Capsule"], "description": "Material type Category" },
+        "uom": { "type": "string", "description": "Unit of Measurement" },
+        "minStock": { "type": "number", "description": "Minimum stock level threshold" },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Creation timestamp" },
+        "palletNo": { "type": "string", "description": "Pallet number for storage tracking" },
+        "drumNo": { "type": "string", "description": "Drum number or sequence" }
+      },
+      "required": ["id", "materialCode", "materialName", "category", "uom", "minStock", "createdAt"]
+    },
+    "Grn": {
+      "title": "GRN",
+      "description": "Goods Receipt Note entry containing supplier, batch, quantities, and quality check status",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Unique GRN Entry identifier" },
+        "grnNo": { "type": "string", "description": "Goods Receipt Note number" },
+        "grnDate": { "type": "string", "format": "date", "description": "Date of GRN receipt" },
+        "supplierName": { "type": "string", "description": "Supplier name" },
+        "materialId": { "type": "string", "description": "Referenced material document ID" },
+        "materialName": { "type": "string", "description": "Denormalized material name" },
+        "batchNo": { "type": "string", "description": "Batch or Lot number" },
+        "qty": { "type": "number", "description": "Received quantity" },
+        "mfgDate": { "type": "string", "format": "date", "description": "Manufacturing date" },
+        "expDate": { "type": "string", "format": "date", "description": "Expiration date" },
+        "invoiceNo": { "type": "string", "description": "Invoice number" },
+        "coaNo": { "type": "string", "description": "Certificate of Analysis number" },
+        "warehouseLocation": { "type": "string", "description": "Specific warehouse store location" },
+        "receivedBy": { "type": "string", "description": "Person who received the materials" },
+        "qcStatus": { "type": "string", "enum": ["Pending", "Approved", "Rejected"], "description": "Quality Control checking status" },
+        "qcReleaseDate": { "type": "string", "description": "Date of QC status modification" },
+        "remarks": { "type": "string", "description": "Optional notes or remarks" },
+        "createdOn": { "type": "string", "format": "date-time", "description": "Creation timestamp" },
+        "palletNo": { "type": "string", "description": "Pallet number for storage tracking" },
+        "drumNo": { "type": "string", "description": "Drum number or sequence" },
+        "sourceType": { "type": "string", "enum": ["Supplier", "Production Return", "Jobwork Return"], "description": "Source of inward material" },
+        "jobworkRefNo": { "type": "string", "description": "Jobwork reference document" }
+      },
+      "required": ["id", "grnNo", "grnDate", "supplierName", "materialId", "materialName", "batchNo", "qty", "mfgDate", "expDate", "qcStatus", "createdOn"]
+    },
+    "Outward": {
+      "title": "Outward",
+      "description": "Stock outwards issue documentation tracking",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Unique outwards record ID" },
+        "outwardNo": { "type": "string", "description": "Issue/Challan token code" },
+        "outwardDate": { "type": "string", "format": "date", "description": "Issue action timeline" },
+        "materialId": { "type": "string", "description": "Referenced material master" },
+        "materialName": { "type": "string", "description": "Referenced material name" },
+        "batchNo": { "type": "string", "description": "Item batch identification" },
+        "qty": { "type": "number", "description": "Issued tracking amount volume" },
+        "department": { "type": "string", "description": "Destination workstation/section details" },
+        "issuedBy": { "type": "string", "description": "The operator user username performing action" },
+        "remarks": { "type": "string", "description": "General text context logs" },
+        "createdOn": { "type": "string", "format": "date-time", "description": "Action server timeline logs" },
+        "outwardType": { "type": "string", "enum": ["Trial", "Sample", "Commercial Use"], "description": "Detailed subtype log" },
+        "jobworkVendorName": { "type": "string", "description": "Jobwork subcontractor partner name" },
+        "jobworkDocNo": { "type": "string", "description": "External reference identification" },
+        "jobworkPackingType": { "type": "string", "description": "Challan dispatch structural package mode" },
+        "jobworkPackingQty": { "type": "number", "description": "Package unit count amount" }
+      },
+      "required": ["id", "outwardNo", "outwardDate", "materialId", "materialName", "batchNo", "qty", "department", "issuedBy", "createdOn"]
+    },
+    "Supplier": {
+      "title": "Supplier",
+      "description": "Subcontractor and purchase material supplier profiles",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Partner ID" },
+        "name": { "type": "string", "description": "General corporate/partner title name" },
+        "gstNumber": { "type": "string", "description": "GST business tax identifier" },
+        "address": { "type": "string", "description": "Corporate physical location details" },
+        "email": { "type": "string", "description": "Primary electronic notification account" },
+        "contactNumber": { "type": "string", "description": "Direct communication contact number" },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Onboard date timeline" }
+      },
+      "required": ["id", "name", "createdAt"]
+    },
+    "CompanyProfile": {
+      "title": "CompanyProfile",
+      "description": "App settings company configurations data details metadata",
+      "type": "object",
+      "properties": {
+        "companyName": { "type": "string", "description": "System branding title context" },
+        "logoUrl": { "type": "string", "description": "Branding graphical context URL" },
+        "gstNumber": { "type": "string", "description": "Site default identification tax code" },
+        "address": { "type": "string", "description": "App core visual header physical location" },
+        "email": { "type": "string", "description": "Help center account" },
+        "contactNumber": { "type": "string", "description": "General contact line" },
+        "updatedAt": { "type": "string", "format": "date-time", "description": "Timeline log" }
+      },
+      "required": ["companyName", "gstNumber", "address", "email", "contactNumber", "updatedAt"]
+    }
+  },
+  "firestore": {
+    "users/{userId}": {
+      "schema": { "$ref": "#/entities/User" },
+      "description": "Registered user credentials and access profiles"
+    },
+    "materials/{materialId}": {
+      "schema": { "$ref": "#/entities/Material" },
+      "description": "Material Master details"
+    },
+    "grn/{grnId}": {
+      "schema": { "$ref": "#/entities/Grn" },
+      "description": "Warehouse GRN history and QC lifecycle tracking"
+    },
+    "outwards/{outwardId}": {
+      "schema": { "$ref": "#/entities/Outward" },
+      "description": "Inventory issues and dispatch tracking logs"
+    },
+    "suppliers/{supplierId}": {
+      "schema": { "$ref": "#/entities/Supplier" },
+      "description": "Suppliers and contractors profiles list data index"
+    },
+    "company_profile/{profileId}": {
+      "schema": { "$ref": "#/entities/CompanyProfile" },
+      "description": "Default configuration settings global setup parameter"
+    }
+  }
+}

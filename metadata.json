@@ -1,0 +1,8 @@
+{
+  "name": "Material Inventory Manager v2",
+  "description": "Multi-user materials inventory, GRN entry, QC approval, and real-time stock tracking application.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

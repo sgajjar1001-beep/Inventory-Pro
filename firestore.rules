@@ -1,0 +1,134 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Global Safety Net
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Common Primitives
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    // --- Entity Validation Blueprints ---
+
+    function isValidUser(data) {
+      return data.id is string && data.id.size() <= 128
+        && data.username is string && data.username.size() <= 128
+        && data.password is string && data.password.size() <= 128
+        && data.name is string && data.name.size() <= 128
+        && data.role is string && (data.role == 'Admin' || data.role == 'GRN Operator' || data.role == 'QC Operator' || data.role == 'Viewer')
+        && data.createdAt is string;
+    }
+
+    function isValidMaterial(data) {
+      return data.id is string && data.id.size() <= 128
+        && data.materialCode is string && data.materialCode.size() <= 128
+        && data.materialName is string && data.materialName.size() <= 200
+        && data.category is string && (data.category == 'Raw Material' || data.category == 'PPM' || data.category == 'SPM' || data.category == 'Capsule')
+        && data.uom is string && data.uom.size() <= 50
+        && data.minStock is number
+        && data.createdAt is string;
+    }
+
+    function isValidGrn(data) {
+      return data.id is string && data.id.size() <= 128
+        && data.grnNo is string && data.grnNo.size() <= 128
+        && data.grnDate is string && data.grnDate.size() <= 50
+        && data.supplierName is string && data.supplierName.size() <= 200
+        && data.materialId is string && data.materialId.size() <= 128
+        && data.materialName is string && data.materialName.size() <= 200
+        && data.batchNo is string && data.batchNo.size() <= 128
+        && data.qty is number
+        && data.mfgDate is string && data.mfgDate.size() <= 50
+        && data.expDate is string && data.expDate.size() <= 50
+        && data.qcStatus is string && (data.qcStatus == 'Pending' || data.qcStatus == 'Approved' || data.qcStatus == 'Rejected')
+        && data.createdOn is string;
+    }
+
+    function isValidOutward(data) {
+      return data.id is string && data.id.size() <= 128
+        && data.outwardNo is string && data.outwardNo.size() <= 128
+        && data.outwardDate is string && data.outwardDate.size() <= 50
+        && data.materialId is string && data.materialId.size() <= 128
+        && data.materialName is string && data.materialName.size() <= 200
+        && data.batchNo is string && data.batchNo.size() <= 128
+        && data.qty is number
+        && data.department is string && data.department.size() <= 200
+        && data.issuedBy is string && data.issuedBy.size() <= 128
+        && data.createdOn is string;
+    }
+
+    function isValidSupplier(data) {
+      return data.id is string && data.id.size() <= 128
+        && data.name is string && data.name.size() <= 200
+        && data.createdAt is string;
+    }
+
+    function isValidCompanyProfile(data) {
+      return data.companyName is string && data.companyName.size() <= 200
+        && data.gstNumber is string && data.gstNumber.size() <= 50
+        && data.address is string && data.address.size() <= 500
+        && data.email is string && data.email.size() <= 150
+        && data.contactNumber is string && data.contactNumber.size() <= 50
+        && data.updatedAt is string;
+    }
+
+    // --- Users Collection ---
+    match /users/{userId} {
+      allow read: if true;
+      allow create: if isValidId(userId) && isValidUser(incoming()) && incoming().id == userId;
+      allow update: if isValidId(userId) && isValidUser(incoming()) && incoming().id == userId;
+      allow delete: if false;
+    }
+
+    // --- Materials Collection ---
+    match /materials/{materialId} {
+      allow read: if true;
+      allow create: if isValidId(materialId) && isValidMaterial(incoming()) && incoming().id == materialId;
+      allow update: if isValidId(materialId) && isValidMaterial(incoming()) && incoming().id == materialId;
+      allow delete: if isValidId(materialId);
+    }
+
+    // --- GRN Collection ---
+    match /grn/{grnId} {
+      allow read: if true;
+      allow create: if isValidId(grnId) && isValidGrn(incoming()) && incoming().id == grnId;
+      allow update: if isValidId(grnId) && isValidGrn(incoming()) && incoming().id == grnId;
+      allow delete: if isValidId(grnId);
+    }
+
+    // --- Outward Collection ---
+    match /outwards/{outwardId} {
+      allow read: if true;
+      allow create: if isValidId(outwardId) && isValidOutward(incoming()) && incoming().id == outwardId;
+      allow update: if isValidId(outwardId) && isValidOutward(incoming()) && incoming().id == outwardId;
+      allow delete: if isValidId(outwardId);
+    }
+
+    // --- Suppliers Collection ---
+    match /suppliers/{supplierId} {
+      allow read: if true;
+      allow create: if isValidId(supplierId) && isValidSupplier(incoming()) && incoming().id == supplierId;
+      allow update: if isValidId(supplierId) && isValidSupplier(incoming()) && incoming().id == supplierId;
+      allow delete: if isValidId(supplierId);
+    }
+
+    // --- Company Profile Collection ---
+    match /company_profile/{profileId} {
+      allow read: if true;
+      allow create: if isValidId(profileId) && isValidCompanyProfile(incoming());
+      allow update: if isValidId(profileId) && isValidCompanyProfile(incoming());
+      allow delete: if false;
+    }
+  }
+}
